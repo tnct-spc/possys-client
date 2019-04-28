@@ -7,8 +7,23 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'landing-page',
-      component: require('@/components/LandingPage').default
+      name: 'index-page',
+      component: require('@/components/Index').default
+    },
+    {
+      path: '/charge',
+      name: 'charge-page',
+      component: require('@/components/Charge').default
+    },
+    {
+      path: '/AddCard',
+      name: 'index-page',
+      component: require('@/components/AddCard').default
+    },
+    {
+      path: '/Buy',
+      name: 'index-page',
+      component: require('@/components/Buy').default
     },
     {
       path: '*',

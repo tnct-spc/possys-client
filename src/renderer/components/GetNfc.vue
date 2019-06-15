@@ -1,44 +1,40 @@
 <template>
-  <b-card>
+  <b-card v-if="isWaiting">
     <h3>カードをタッチしてください</h3>
-    <b-progress class="my-2" :value="counter" :max="max" animated></b-progress>
+      <div class="d-flex justify-content-center mb-3">
+        <b-spinner v-if="isWaiting" variant="primary" style="width: 5rem; height: 5rem;"></b-spinner>
+      </div>
   </b-card>
 </template>
 
 <script>
   import Product from './Buy/Product'
-  import { setInterval } from 'timers'
+  const exec = require('child_process').exec
 
   export default {
     name: 'landing-page',
     components: { Product },
     data: function () {
       return {
-        counter: 10,
-        max: 10,
-        timer: Object
+        isWaiting: false
       }
-    },
-    watch: {
-      counter: function (val) {
-        if (val > 10) {
-          this.$emit('stop', 'faild')
-        }
-      }
-    },
-    mounted: function () {
-      this.timer = setInterval(() => {
-        this.counter += 0.1
-        console.log(this.counter)
-      }, 100)
     },
     methods: {
       open (link) {
         this.$electron.shell.openExternal(link)
       },
-      startCount () {
-        console.log('started')
-        this.counter = 0
+      startWaitingTouch () {
+        this.isWaiting = true
+        exec('readidmsudo', (err, stdout, stderr) => {
+          this.isWaiting = false
+          if (err || stdout.includes('faild') || stdout.includes('timeout')) {
+            console.log(err)
+            this.$emit('stop', 'failed')
+          } else {
+            this.$emit('stop', stdout)
+            console.log(stdout)
+          }
+        })
       }
     }
   }
@@ -46,3 +42,4 @@
 
 <style>
 </style>
+

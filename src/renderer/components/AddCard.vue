@@ -2,6 +2,7 @@
   <div id="wrapper">
    <h1>AddCard page</h1> 
    <router-link to="/">Back</router-link>
+      <GetNfc ref="nfcsensor" v-on:stop="touch"/>
   </div>
 </template>
 

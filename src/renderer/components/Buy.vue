@@ -11,7 +11,7 @@
      />
    </div>
     <b-modal
-      id="buy-modal"
+      ref="buy-modal"
       hide-footer
       title="購入"
       size="xl">
@@ -95,16 +95,16 @@
       },
       onBuy (productId) {
         console.log(productId)
-        this.$refs.nfcsensor.startCount()
-        this.$bvModal.show('buy-modal')
+        this.$refs.nfcsensor.startWaitingTouch()
+        this.$refs['buy-modal'].show()
         this.cart = this.Products.find((product) => {
           return product.id === productId
         })
       },
       touch (Idm) {
         console.log(Idm)
+        // this.$refs['buy-modal'].hide()
         // axios.post ....(購入処理を書く)
-        this.$bvModal.hide('buy-modal')
       }
     }
   }

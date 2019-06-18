@@ -38,9 +38,10 @@
       },
       touch (idm) {
         if (idm === 'failed') return
-        axios.get('https://localhost/accounts/api/add_idm/' + idm + '/', {headers: {Authorization: 'token 12ce74fac36274cf49a13e408b73d19025e637ef'}}).then(data => {
+        console.log(window.process.env)
+        axios.get(process.env.djangohost + '/accounts/api/add_idm/' + idm + '/', {headers: {Authorization: 'token ' + process.env.djangotoken}}).then(data => {
           this.$refs['qr-modal'].show()
-          this.setQr('https://localhost/accounts/add_card/' + data.data)
+          this.setQr(process.env.djangohost + '/accounts/add_card/' + data.data)
         })
       },
       setQr (text) {

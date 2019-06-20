@@ -18,6 +18,11 @@
       <h2>購入物: {{ cart.name }}</h2>
       <h4>価格: {{cart.price}}円</h4>
       <GetNfc ref="nfcsensor" v-on:stop="touch"/>
+      <div v-show="showAlert">
+        <b-alert show :variant="alertColor">
+          {{ message }}
+        </b-alert>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -25,6 +30,8 @@
 <script>
   import Product from './Buy/Product'
   import GetNfc from './GetNfc'
+  import axios from 'axios'
+  import { setTimeout } from 'timers'
 
   export default {
     name: 'landing-page',
@@ -35,76 +42,64 @@
     data: () => {
       return {
         cart: {},
-        Products: [
-          {
-            id: 2,
-            name: 'ポテチ',
-            price: 100
-          },
-          {
-            id: 3,
-            name: 'ペッドボトルジュース',
-            price: 60
-          },
-          {
-            id: 4,
-            name: '炭酸水',
-            price: 40
-          },
-          {
-            id: 5,
-            name: 'モンスターエナジー',
-            price: 160
-          },
-          {
-            id: 6,
-            name: 'チョコ',
-            price: 100
-          },
-          {
-            id: 7,
-            name: 'カップラーメン',
-            price: 100
-          },
-          {
-            id: 8,
-            name: 'ペヤング(大)',
-            price: 200
-          },
-          {
-            id: 9,
-            name: 'コアラのマーチ',
-            price: 100
-          },
-          {
-            id: 10,
-            name: '春雨スープ',
-            price: 10
-          },
-          {
-            id: 11,
-            name: 'チャルメラ',
-            price: 30
-          }
-        ]
+        Products: [],
+        alertColor: 'success',
+        showAlert: false,
+        message: ''
       }
     },
+    mounted: function () {
+      this.fetchProducts()
+    },
     methods: {
+      fetchProducts () {
+        console.log()
+        axios.get(process.env.djangohost + '/api/possys/products/', {headers: {Authorization: 'token ' + process.env.djangotoken}}).then(data => {
+          console.log(data.data)
+          data.data.forEach((p, i) => {
+            console.log(p)
+            this.Products.push(p)
+          })
+        })
+      },
       open (link) {
         this.$electron.shell.openExternal(link)
       },
       onBuy (productId) {
-        console.log(productId)
-        this.$refs.nfcsensor.startWaitingTouch()
         this.$refs['buy-modal'].show()
+        this.$refs.nfcsensor.startWaitingTouch()
         this.cart = this.Products.find((product) => {
           return product.id === productId
         })
       },
-      touch (Idm) {
-        console.log(Idm)
-        // this.$refs['buy-modal'].hide()
-        // axios.post ....(購入処理を書く)
+      touch (idm) {
+        if (idm === 'failed') {
+          this.showAlert = true
+          this.alertColor = 'danger'
+          this.message = 'IDmの取得に失敗しました'
+          setTimeout(() => {
+            this.$refs['buy-modal'].hide()
+            this.showAlert = false
+            this.message = ''
+            this.alertColor = 'primary'
+          }, 2000)
+          return
+        }
+        axios.get(process.env.djangohost + '/possys/api/add_transaction/' + idm + '/' + this.cart.id + '/', {headers: {Authorization: 'token ' + process.env.djangotoken}}).then(data => {
+          console.log(data.data)
+          this.showAlert = true
+          this.message = data.data.split(',')[1]
+          const success = data.data.split(',')[0]
+          if (success === 'False') {
+            this.alertColor = 'danger'
+          }
+          setTimeout(() => {
+            this.$refs['buy-modal'].hide()
+            this.message = ''
+            this.showAlert = false
+            this.alertColor = 'primary'
+          }, 3000)
+        })
       }
     }
   }

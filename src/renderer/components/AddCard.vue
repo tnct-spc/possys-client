@@ -2,19 +2,17 @@
   <div id="wrapper">
    <b-button @click="addCard">カードを追加する</b-button>
    <b-modal
-      ref="nfc-modal"
+      ref="addcard-modal"
       hide-footer
       hide-header
-      size="xl">
+      size="xl"
+      @hidden="resetModalData">
       <GetNfc ref="nfcsensor" v-on:stop="touch"/>
+      <div v-show="showQr">
+        <h3>QRコードを読み取ってください</h3>
+        <svg v-html="svgtext" height="400px" width="400px"></svg>
+      </div>
    </b-modal>
-   <b-modal
-      ref="qr-modal"
-      hide-footer
-      hide-header
-      size="xl">
-      <svg v-html="svgtext" height="500px" width="500px"></svg>
-    </b-modal>
   </div>
 </template>
 
@@ -30,7 +28,8 @@
     data: () => {
       return {
         svgtext: '',
-        count: 60
+        showQr: false,
+        timer: Object
       }
     },
     methods: {
@@ -39,14 +38,13 @@
       },
       addCard () {
         this.$refs.nfcsensor.startWaitingTouch()
-        this.$refs['nfc-modal'].show()
+        this.$refs['addcard-modal'].show()
       },
       touch (idm) {
-        this.$refs['nfc-modal'].hide()
         if (idm === 'failed') return
         console.log(window.process.env)
         axios.get(process.env.djangohost + '/accounts/api/add_idm/' + idm + '/', {headers: {Authorization: 'token ' + process.env.djangotoken}}).then(data => {
-          this.$refs['qr-modal'].show()
+          this.showQr = true
           this.setQr(process.env.djangohost + '/accounts/add_card/' + data.data)
         })
       },
@@ -54,11 +52,15 @@
         QRCode.toString(text, {type: 'svg', console: {light: '#0000'}}, (error, text) => {
           if (error) console.log(error)
           this.svgtext = text
-          setTimeout(() => {
-            this.$refs['qr-modal'].hide()
-            this.svgtext = ''
+          this.timer = setTimeout(() => {
+            this.$refs['addcard-modal'].hide()
           }, 10 * 1000)
         })
+      },
+      resetModalData () {
+        this.svgtext = ''
+        this.showQr = false
+        this.timer = false
       }
 
     }

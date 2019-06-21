@@ -5,7 +5,8 @@
       ref="charge-modal"
       hide-footer
       title="チャージ"
-      size="xl">
+      size="xl"
+      @hidden="resetModalData">
       <GetNfc ref="nfcsensor" v-on:stop="touch"/>
       <div v-show="showAlert">
         <b-alert show :variant="alertColor">
@@ -28,7 +29,8 @@
       return {
         alertColor: 'success',
         showAlert: false,
-        message: ''
+        message: '',
+        timer: Object
       }
     },
     methods: {
@@ -42,11 +44,8 @@
           this.showAlert = true
           this.alertColor = 'danger'
           this.message = 'IDmの取得に失敗しました'
-          setTimeout(() => {
+          this.timer = setTimeout(() => {
             this.$refs['charge-modal'].hide()
-            this.showAlert = false
-            this.message = ''
-            this.alertColor = 'primary'
           }, 2000)
           return
         }
@@ -57,15 +56,18 @@
           if (success === 'False') {
             this.alertColor = 'danger'
           }
-          setTimeout(() => {
+          this.timer = setTimeout(() => {
             this.$refs['charge-modal'].hide()
-            this.message = ''
-            this.showAlert = false
-            this.alertColor = 'primary'
           }, 3000)
         })
+      },
+      resetModalData () {
+        console.log('test')
+        this.alertColor = 'success'
+        this.showAlert = false
+        this.message = ''
+        this.timer = null
       }
-    //   https://localhost/possys/api/add_transaction_directory/010102123e1a5526/1000/
     }
   }
 </script>

@@ -12,7 +12,8 @@
       ref="buy-modal"
       hide-footer
       title="購入"
-      size="xl">
+      size="xl"
+      @hidden="resetModalData">
       <h2>購入物: {{ cart.name }}</h2>
       <h4>価格: {{cart.price}}円</h4>
       <GetNfc ref="nfcsensor" v-on:stop="touch"/>
@@ -43,7 +44,8 @@
         Products: [],
         alertColor: 'success',
         showAlert: false,
-        message: ''
+        message: '',
+        timer: Object
       }
     },
     mounted: function () {
@@ -71,15 +73,12 @@
         })
       },
       touch (idm) {
-        if (idm === 'failed') {
+        if (!idm || idm === 'failed') {
           this.showAlert = true
           this.alertColor = 'danger'
           this.message = 'IDmの取得に失敗しました'
-          setTimeout(() => {
+          this.timer = setTimeout(() => {
             this.$refs['buy-modal'].hide()
-            this.showAlert = false
-            this.message = ''
-            this.alertColor = 'primary'
           }, 2000)
           return
         }
@@ -90,13 +89,17 @@
           if (success === 'False') {
             this.alertColor = 'danger'
           }
-          setTimeout(() => {
+          this.timer = setTimeout(() => {
             this.$refs['buy-modal'].hide()
-            this.message = ''
-            this.showAlert = false
-            this.alertColor = 'primary'
           }, 3000)
         })
+      },
+      resetModalData () {
+        console.log('test')
+        this.alertColor = 'success'
+        this.showAlert = false
+        this.message = ''
+        this.timer = null
       }
     }
   }

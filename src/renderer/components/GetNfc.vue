@@ -16,7 +16,8 @@
     components: { Product },
     data: function () {
       return {
-        isWaiting: false
+        isWaiting: false,
+        commandRunning: false
       }
     },
     methods: {
@@ -25,15 +26,18 @@
       },
       startWaitingTouch () {
         this.isWaiting = true
+        if (this.commandRunning) {
+          return
+        }
+        this.commandRunning = true
         exec('readidmsudo', (err, stdout, stderr) => {
           this.isWaiting = false
           if (err || stdout.includes('faild') || stdout.includes('timeout')) {
-            console.log(err)
             this.$emit('stop', 'failed')
           } else {
             this.$emit('stop', stdout)
-            console.log(stdout)
           }
+          this.commandRunning = false
         })
       }
     }

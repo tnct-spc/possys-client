@@ -1,7 +1,5 @@
 <template>
   <div>
-   <h1>Buy page</h1> 
-   <router-link to="/">Back</router-link>
    <div v-for="product of Products" :key="product.id">
      <Product
        :title='product.name'
@@ -86,7 +84,6 @@
           return
         }
         axios.get(process.env.djangohost + '/possys/api/add_transaction/' + idm + '/' + this.cart.id + '/', {headers: {Authorization: 'token ' + process.env.djangotoken}}).then(data => {
-          console.log(data.data)
           this.showAlert = true
           this.message = data.data.split(',')[1]
           const success = data.data.split(',')[0]

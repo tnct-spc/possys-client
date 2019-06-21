@@ -1,16 +1,20 @@
 <template>
   <div id="wrapper">
-   <h1>AddCard page</h1> 
-   <router-link to="/">Back</router-link>
-      <b-button @click="addCard">カードを追加する</b-button>
+   <b-button @click="addCard">カードを追加する</b-button>
+   <b-modal
+      ref="nfc-modal"
+      hide-footer
+      hide-header
+      size="xl">
       <GetNfc ref="nfcsensor" v-on:stop="touch"/>
-      <b-modal
-        ref="qr-modal"
-        hide-footer
-        hide-header
-        size="xl">
-        <svg v-html="svgtext" height="500px" width="500px"></svg>
-      </b-modal>
+   </b-modal>
+   <b-modal
+      ref="qr-modal"
+      hide-footer
+      hide-header
+      size="xl">
+      <svg v-html="svgtext" height="500px" width="500px"></svg>
+    </b-modal>
   </div>
 </template>
 
@@ -35,8 +39,10 @@
       },
       addCard () {
         this.$refs.nfcsensor.startWaitingTouch()
+        this.$refs['nfc-modal'].show()
       },
       touch (idm) {
+        this.$refs['nfc-modal'].hide()
         if (idm === 'failed') return
         console.log(window.process.env)
         axios.get(process.env.djangohost + '/accounts/api/add_idm/' + idm + '/', {headers: {Authorization: 'token ' + process.env.djangotoken}}).then(data => {
@@ -51,7 +57,7 @@
           setTimeout(() => {
             this.$refs['qr-modal'].hide()
             this.svgtext = ''
-          }, 30 * 1000)
+          }, 10 * 1000)
         })
       }
 

@@ -1,6 +1,8 @@
 <template>
   <div id="wrapper">
-   <h1>Index Page</h1> 
+   <b-navbar type="light" variant="dark">
+      <b-navbar-bland>possys-client</b-navbar-bland>
+   </b-navbar>
    <AddCard />
    <Charge />
    <Buy />
